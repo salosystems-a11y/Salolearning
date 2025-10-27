@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --angola-red: #ce1126;
+  --angola-black: #000000;
+  --angola-yellow: #ffcd00;
+  --diamond-blue: #1e40af;
+  --oil-dark: #1a1a1a;
+  --coffee-brown: #8b4513;
+  --gold-shine: #ffd700;
+  --emerald-green: #059669;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--oil-dark);
+  color: white;
+  min-height: 100vh;
+}
+
+.hero-pattern {
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(255, 215, 0, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 75% 75%, rgba(30, 64, 175, 0.1) 0%, transparent 40%),
+    linear-gradient(45deg, transparent 40%, rgba(5, 150, 105, 0.05) 50%, transparent 60%);
+  background-size: 200px 200px, 300px 300px, 400px 400px;
+  animation: heroShift 40s ease-in-out infinite;
+}
+
+@keyframes heroShift {
+  0%, 100% { background-position: 0% 0%, 100% 100%, 0% 100%; }
+  50% { background-position: 100% 100%, 0% 0%, 100% 0%; }
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.angola-gradient {
+  background: linear-gradient(135deg, var(--angola-red), var(--angola-yellow));
+  color: var(--angola-black);
+  font-weight: 600;
+}
+
+.diamond-glow {
+  box-shadow: 0 0 20px var(--diamond-blue), 0 0 40px var(--diamond-blue);
+}
+
+.gold-shimmer {
+  background: linear-gradient(45deg, var(--gold-shine), var(--angola-yellow), var(--gold-shine));
+  background-size: 200% 200%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.hero-symbol {
+  font-size: 4rem;
+  background: linear-gradient(45deg, var(--gold-shine), var(--diamond-blue), var(--emerald-green));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: symbolPulse 2s ease-in-out infinite;
+}
+
+@keyframes symbolPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.ranking-badge {
+  background: radial-gradient(circle, var(--gold-shine) 0%, var(--angola-yellow) 100%);
+  border: 1px solid var(--gold-shine);
+  color: var(--angola-black);
+}
+
+.task-card {
+  background: linear-gradient(135deg, 
+    rgba(206, 17, 38, 0.2) 0%, 
+    rgba(255, 205, 0, 0.2) 100%
+  );
+  border-left: 4px solid var(--angola-red);
+  transition: all 0.3s ease;
+}
+
+.task-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(206, 17, 38, 0.3);
+}
+
+.progress-bar {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar > div {
+  background: linear-gradient(90deg, var(--angola-red), var(--angola-yellow));
+}
+
+
+.quiz-option {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.quiz-option:hover {
+  border-color: var(--angola-yellow);
+  background: rgba(255, 205, 0, 0.1);
+}
+
+.quiz-option.selected {
+  border-color: var(--angola-red);
+  background: rgba(206, 17, 38, 0.2);
+}
+
+.quiz-option.correct {
+  border-color: var(--emerald-green);
+  background: rgba(5, 150, 105, 0.2);
+}
+
+.quiz-option.incorrect {
+  border-color: var(--angola-red);
+  background: rgba(206, 17, 38, 0.3);
+}
