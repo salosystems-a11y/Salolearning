@@ -11,6 +11,7 @@ import QuizPage from '@/pages/QuizPage';
 import RankingPage from '@/pages/RankingPage';
 import CoursePage from '@/pages/CoursePage';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import ManagerDashboard from '@/pages/ManagerDashboard';
 
 function App() {
   return (
@@ -31,6 +32,14 @@ function App() {
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+           <Route 
+            path="/dashboard/*" 
+            element={
+              <ProtectedRoute requiredRole={["manager", "teacher", "student"]}>
+                <ManagerDashboard />
               </ProtectedRoute>
             } 
           />

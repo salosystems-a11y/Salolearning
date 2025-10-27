@@ -10,6 +10,7 @@ export const DataProvider = ({ children }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState([]);
+  const [companies, setCompanies] = useState([]);
   const [courses, setCourses] = useState([]);
   const [quizzes, setQuizzes] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -45,6 +46,7 @@ export const DataProvider = ({ children }) => {
       setLoading(true);
       Promise.all([
         fetchData('users', setUsers),
+        fetchData('companies', setCompanies),
         fetchData('courses', setCourses),
         fetchData('quizzes', setQuizzes),
         fetchData('tasks', setTasks),
@@ -56,6 +58,7 @@ export const DataProvider = ({ children }) => {
     } else {
       setLoading(false);
       setUsers([]);
+      setCompanies([]);
       setCourses([]);
       setQuizzes([]);
       setTasks([]);
@@ -88,6 +91,7 @@ export const DataProvider = ({ children }) => {
 
     const subscriptionsSetup = [
       { table: 'users', setter: setUsers },
+      { table: 'companies', setter: setCompanies },
       { table: 'courses', setter: setCourses },
       { table: 'quizzes', setter: setQuizzes },
       { table: 'tasks', setter: setTasks },
@@ -136,6 +140,22 @@ export const DataProvider = ({ children }) => {
     }
   };
   
+  const createCompany = async (companyData) => {
+    try {
+      const { data, error } = await supabase.from('companies').insert([companyData]).select().single();
+      if (error) throw error;
+      toast({ title: 'Empresa Criada', description: `${companyData.name} foi criada com sucesso.` });
+      return data;
+    } catch(error) {
+        toast({
+            title: 'Erro ao Criar Empresa',
+            description: error.message,
+            variant: 'destructive',
+        });
+        return null;
+    }
+  };
+  
   const createSubscriptionRequest = async (subData) => {
     try {
         const { data, error } = await supabase.from('subscriptions').insert([subData]).select().single();
@@ -156,7 +176,7 @@ export const DataProvider = ({ children }) => {
     try {
       const { error } = await supabase
         .from('users')
-        .update({ name: updates.name, role: updates.role })
+        .update({ name: updates.name, role: updates.role, company_id: updates.company_id })
         .eq('id', userId);
 
       if (error) throw error;
@@ -320,6 +340,7 @@ export const DataProvider = ({ children }) => {
 
   const value = {
     users,
+    companies,
     courses,
     quizzes,
     tasks,
@@ -328,6 +349,7 @@ export const DataProvider = ({ children }) => {
     subscriptions,
     loading,
     createUser,
+    createCompany,
     updateUser,
     deleteUser,
     deleteAllUsers,

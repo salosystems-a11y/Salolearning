@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useData } from '@/contexts/DataContext';
@@ -28,7 +29,10 @@ const RankingManagement = () => {
   };
 
   const getStudentStats = (userId) => {
-    const userResults = quizResults.filter(r => r.userId === userId);
+    const userResults = quizResults.filter(r => {
+        const student = users.find(u => u.id === r.user_id);
+        return student?.id === userId;
+    });
     const totalQuizzes = userResults.length;
     const averageScore = totalQuizzes > 0 
       ? Math.round(userResults.reduce((sum, r) => sum + r.score, 0) / totalQuizzes)
@@ -70,7 +74,6 @@ const RankingManagement = () => {
         <p className="text-gray-400">Acompanhe o desempenho e progresso dos estudantes</p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat, index) => (
           <motion.div
@@ -94,9 +97,8 @@ const RankingManagement = () => {
         ))}
       </div>
 
-      {/* Rankings Table */}
       <Card className="glass-effect border-2 border-yellow-400/30">
-        <div className="p-6">
+        <div className="p-6 overflow-x-auto">
           <h2 className="text-xl font-bold mb-4 flex items-center">
             <Trophy className="w-5 h-5 mr-2" />
             Ranking Completo de Heróis
@@ -109,10 +111,9 @@ const RankingManagement = () => {
               <p className="text-gray-400">Os estudantes precisam completar quizzes para aparecer no ranking</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 min-w-[700px]">
               {studentRankings.map((ranking, index) => {
                 const position = index + 1;
-                const userData = users.find(u => u.id === ranking.id);
                 const stats = getStudentStats(ranking.id);
                 
                 return (
@@ -121,51 +122,38 @@ const RankingManagement = () => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`p-4 rounded-lg border-2 ${getRankColor(position)} transition-all hover:scale-[1.02]`}
+                    className={`p-4 rounded-lg border-2 ${getRankColor(position)} transition-all hover:scale-[1.01]`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-800">
+                    <div className="grid grid-cols-5 gap-4 items-center">
+                      <div className="flex items-center space-x-4 col-span-2">
+                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-800 flex-shrink-0">
                           {getRankIcon(position)}
                         </div>
-                        
-                        <div className="flex items-center space-x-4">
-                          <div className="text-3xl">{'✨'}</div> {/* Placeholder hero symbol, actual symbol not stored */}
-                          <div>
-                            <div className="font-semibold text-lg">{userData?.name}</div>
-                            <div className="text-sm text-gray-400">{userData?.email}</div>
-                          </div>
+                        <div>
+                          <div className="font-semibold text-lg">{ranking.name}</div>
+                          <div className="text-sm text-gray-400 truncate">{ranking.email}</div>
                         </div>
                       </div>
                       
-                      <div className="flex items-center space-x-8">
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-yellow-400">
-                            {ranking.score}
-                          </div>
-                          <div className="text-xs text-gray-400">pontos</div>
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-yellow-400">
+                          {ranking.score}
                         </div>
-                        
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-blue-400">
-                            {stats.totalQuizzes}
-                          </div>
-                          <div className="text-xs text-gray-400">quizzes</div>
+                        <div className="text-xs text-gray-400">pontos</div>
+                      </div>
+                      
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-blue-400">
+                          {stats.totalQuizzes}
                         </div>
-                        
-                        <div className="text-center">
-                          <div className="text-lg font-bold text-green-400">
-                            {stats.averageScore}
-                          </div>
-                          <div className="text-xs text-gray-400">média</div>
+                        <div className="text-xs text-gray-400">quizzes</div>
+                      </div>
+                      
+                      <div className="text-center">
+                        <div className="text-lg font-bold text-green-400">
+                          {stats.averageScore}%
                         </div>
-                        
-                        <div className="text-center">
-                          <div className="text-sm text-gray-300">
-                            {new Date(userData?.created_at || new Date()).toLocaleDateString('pt-BR')}
-                          </div>
-                          <div className="text-xs text-gray-400">membro desde</div>
-                        </div>
+                        <div className="text-xs text-gray-400">média</div>
                       </div>
                     </div>
                   </motion.div>
@@ -173,25 +161,6 @@ const RankingManagement = () => {
               })}
             </div>
           )}
-        </div>
-      </Card>
-
-      {/* Additional Info */}
-      <Card className="glass-effect p-6 border-2 border-blue-400/30">
-        <h3 className="text-lg font-semibold mb-3 flex items-center">
-          <span className="text-2xl mr-2">ℹ️</span>
-          Informações do Sistema de Ranking
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
-          <div className="space-y-2">
-            <p>• Pontos são ganhos através de quizzes e tarefas</p>
-            <p>• O ranking é atualizado em tempo real</p>
-          </div>
-          <div className="space-y-2">
-            <p>• Estudantes só veem símbolos anônimos no ranking</p>
-            <p>• Apenas administradores veem nomes reais</p>
-            <p>• Sistema gamificado motiva o aprendizado</p>
-          </div>
         </div>
       </Card>
     </div>

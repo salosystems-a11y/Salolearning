@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const fetchUserProfile = useCallback(async (currentUser) => {
     if (!currentUser) {
       setUserProfile(null);
-      return;
+      return null;
     }
     
     try {
@@ -26,25 +26,33 @@ export const AuthProvider = ({ children }) => {
         .eq('auth_id', currentUser.id)
         .single();
       
-      // PGRST116 means no rows found, which is a valid state if the profile hasn't been created yet.
+      // PGRST116 means no rows found, which is a valid state if the profile isn't created yet.
       // We should not treat it as a fatal error.
       if (error && error.code !== 'PGRST116') {
         throw error;
       }
       
       setUserProfile(profile || null);
+      return profile || null;
+
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao carregar perfil do utilizador",
-        description: error.message,
-      });
+      console.error("Erro ao carregar perfil do utilizador:", error);
+      // Avoid toasting for non-fatal errors like network issues during initial load
+      if (error.code !== 'PGRST116') {
+          toast({
+            variant: "destructive",
+            title: "Erro de Rede",
+            description: "Não foi possível carregar o perfil do utilizador. Verifique a sua conexão.",
+          });
+      }
       setUserProfile(null);
+      return null;
     }
   }, [toast]);
 
 
-  const handleSession = useCallback(async (currentSession) => {
+  const onAuthStateChange = useCallback(async (event, currentSession) => {
+    setLoading(true);
     setSession(currentSession);
     const currentUser = currentSession?.user ?? null;
     setUser(currentUser);
@@ -52,30 +60,24 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, [fetchUserProfile]);
 
+
   useEffect(() => {
     setLoading(true);
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      handleSession(session);
+    const getInitialSession = async () => {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        setSession(initialSession);
+        const initialUser = initialSession?.user ?? null;
+        setUser(initialUser);
+        await fetchUserProfile(initialUser);
+        setLoading(false);
     };
 
-    getSession();
+    getInitialSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        // Manually re-fetch profile on sign in to ensure data is fresh
-        if (event === "SIGNED_IN") {
-            setLoading(true);
-            await handleSession(session);
-            setLoading(false);
-        } else {
-            await handleSession(session);
-        }
-      }
-    );
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(onAuthStateChange);
 
     return () => subscription.unsubscribe();
-  }, [handleSession]);
+  }, [onAuthStateChange]);
 
   const signUp = async (email, password, options) => {
     setLoading(true);
@@ -115,7 +117,7 @@ export const AuthProvider = ({ children }) => {
         description: error.message,
       });
     }
-    setLoading(false);
+    // After sign out, states are cleared by onAuthStateChange
     return { error };
   };
 
